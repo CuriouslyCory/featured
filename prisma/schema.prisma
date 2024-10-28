@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Browsers {
+    id                    Int        @id @default(autoincrement())
+    name                  String
+    type                  String
+    upstream              String?
+    preview_name          String?
+    pref_url              String?
+    accepts_flags         Boolean
+    accepts_webextensions Boolean
+    createdAt             DateTime   @default(now())
+    updatedAt             DateTime   @updatedAt
+    Releases              Releases[]
+    Support               Support[]
+
+    @@index([name])
+}
+
+model Releases {
+    id            Int       @id @default(autoincrement())
+    browserId     Int
+    browser       Browsers  @relation(fields: [browserId], references: [id])
+    version       String
+    releaseDate   DateTime?
+    releaseNotes  String?
+    status        String
+    engine        String?
+    engineVersion String?
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+}
+
+model Features {
+    id             Int       @id @default(autoincrement())
+    description    String?
+    mdnUrl         String?
+    specUrl        String?
+    tags           String[]
+    sourceFile     String?
+    experimental   Boolean
+    standard_track Boolean
+    deprecated     Boolean
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
+    Support        Support[]
+}
+
+model Support {
+    id                     Int      @id @default(autoincrement())
+    featureId              Int
+    feature                Features @relation(fields: [featureId], references: [id])
+    browserId              Int
+    browser                Browsers @relation(fields: [browserId], references: [id])
+    versionAdded           String?
+    versionRemoved         String?
+    versionLast            String?
+    prefix                 String?
+    alternative_name       String?
+    impl_url               String?
+    partial_implementation Boolean?
+    notes                  String?
+    createdAt              DateTime @default(now())
+    updatedAt              DateTime @updatedAt
+}
